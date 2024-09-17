@@ -2,31 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Countries;
+use App\Entity\Coupons;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Countries>
+ * @extends ServiceEntityRepository<Coupons>
  */
-class CountriesRepository extends ServiceEntityRepository
+class CouponsRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Countries::class);
-    }
-
-    public function getCountryCodes(): array
-    {
-        $qb = $this->createQueryBuilder('c')
-            ->select('c.code')
-            ->getQuery();
-
-        return array_column($qb->getResult(), 'code');
+        parent::__construct($registry, Coupons::class);
     }
 
     //    /**
-    //     * @return Countries[] Returns an array of Countries objects
+    //     * @return Coupons[] Returns an array of Coupons objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -40,7 +31,7 @@ class CountriesRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Countries
+    //    public function findOneBySomeField($value): ?Coupons
     //    {
     //        return $this->createQueryBuilder('c')
     //            ->andWhere('c.exampleField = :val')
