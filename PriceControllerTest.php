@@ -50,15 +50,12 @@ class PriceControllerTest extends TestCase
      */
     public function testCalculatePriceSuccess($inputData, $expectedOutput)
     {
-        // Создаем продукт
         $product = new Products();
-//        $product->setId(1);
         $product->setName('Тестовый продукт');
-        $product->setPrice(1000); // Установим базовую цену
+        $product->setPrice(1000);
 
-        // Создаем налог
         $tax = new Countries();
-        $tax->setTax(0.19); // 19% НДС для теста
+        $tax->setTax(19);
 
         $coupon = new Coupons();
         $coupon->setValue(123)->setType(Coupons::FIXED);
@@ -99,7 +96,7 @@ class PriceControllerTest extends TestCase
                 ],
                 [
                     'name' => 'Тестовый продукт',
-                    'price' => "8.77"
+                    'price' => "10.67"
                 ]
             ],
             // Вы можете добавить больше тестовых случаев здесь
