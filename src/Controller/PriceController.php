@@ -8,6 +8,7 @@ use App\Exceptions\DiscountException;
 use App\Exceptions\PriceException;
 use App\Helpers\PriceHelper;
 use App\Repository\CountriesRepository;
+use App\Repository\CouponsRepository;
 use App\Repository\ProductsRepository;
 use App\Services\PricesService\CalculatePriceRequest;
 use App\Services\PricesService\CalculatePriceService;
@@ -30,6 +31,7 @@ class PriceController extends AbstractController
         Request $request,
         ProductsRepository $productsRepository,
         CountriesRepository $cR,
+        CouponsRepository $couponsRepository,
         ValidatorInterface $validator,
         EntityManagerInterface $em,
     ): JsonResponse {
@@ -47,16 +49,16 @@ class PriceController extends AbstractController
         /** @var Products $product */
         $product = $productsRepository->find($calculatePriceRequest->getProductId());
 
-        $tax = $em->getRepository(Countries::class)->findOneBy(['code' => $calculatePriceRequest->getTaxNumber()]);
+        $tax = $cR->findOneBy(['code' => $calculatePriceRequest->getTaxNumber()]);
 
         try {
-            $price = CalculatePriceService::init($em)->calculatePrice(
+            $price = CalculatePriceService::init($couponsRepository)->calculatePrice(
                 $product->getPrice(),
                 $tax->getTax(),
                 $calculatePriceRequest->getCouponCode(),
             );
 
-            return $this->json([
+            return new JsonResponse([
                 'name' => $product->getName(),
                 'price' => PriceHelper::minorToMajor($price),
             ]);

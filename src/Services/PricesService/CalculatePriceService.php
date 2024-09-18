@@ -5,22 +5,22 @@ namespace App\Services\PricesService;
 use App\Entity\Coupons;
 use App\Exceptions\DiscountException;
 use App\Exceptions\PriceException;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\CouponsRepository;
 
 class CalculatePriceService
 {
     private static ?CalculatePriceService $instance = null;
 
-    public static function init(EntityManagerInterface $em): CalculatePriceService
+    public static function init(CouponsRepository $couponsRepository): CalculatePriceService
     {
         if (self::$instance === null) {
-            self::$instance = new self($em);
+            self::$instance = new self($couponsRepository);
         }
 
         return self::$instance;
     }
 
-    public function __construct(private readonly EntityManagerInterface $em) {}
+    public function __construct(private readonly CouponsRepository $couponsRepository) {}
 
     /**
      * @param int $price
@@ -62,7 +62,7 @@ class CalculatePriceService
         }
 
         /** @var Coupons $coupon */
-        $coupon = $this->em->getRepository(Coupons::class)->findOneBy(['name' => $discount]);
+        $coupon = $this->couponsRepository->findOneBy(['name' => $discount]);
 
         if (!$coupon) {
             throw new DiscountException('incorrect discount');

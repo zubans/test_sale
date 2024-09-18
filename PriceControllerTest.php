@@ -3,8 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Countries;
+use App\Entity\Coupons;
 use App\Entity\Products;
+use App\Exceptions\DiscountException;
+use App\Exceptions\PriceException;
 use App\Repository\CountriesRepository;
+use App\Repository\CouponsRepository;
 use App\Repository\ProductsRepository;
 use App\Services\PricesService\CalculatePriceService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +23,8 @@ class PriceControllerTest extends TestCase
 {
     private $productsRepository;
     private $countriesRepository;
+
+    private $couponsRepository;
     private $validator;
     private $em;
     private $controller;
@@ -28,19 +34,19 @@ class PriceControllerTest extends TestCase
         parent::setUp();
         $this->productsRepository = $this->createMock(ProductsRepository::class);
         $this->countriesRepository = $this->createMock(CountriesRepository::class);
+        $this->couponRepository = $this->createMock(CouponsRepository::class);
         $this->validator = $this->createMock(ValidatorInterface::class);
         $this->em = $this->createMock(EntityManagerInterface::class);
-        $this->controller = new PriceController(
-            $this->productsRepository,
-            $this->countriesRepository,
-            $this->validator,
-            $this->em
-        );
+        $this->controller = new PriceController();
     }
 
     /**
      * @dataProvider successDataProvider
+     * @param $inputData
+     * @param $expectedOutput
      * @throws Exception
+     * @throws DiscountException
+     * @throws PriceException
      */
     public function testCalculatePriceSuccess($inputData, $expectedOutput)
     {
@@ -54,28 +60,29 @@ class PriceControllerTest extends TestCase
         $tax = new Countries();
         $tax->setTax(0.19); // 19% НДС для теста
 
-        // Мокаем вызовы репозиториев
+        $coupon = new Coupons();
+        $coupon->setValue(123)->setType(Coupons::FIXED);
+
         $this->productsRepository->method('find')->willReturn($product);
         $this->countriesRepository->method('findOneBy')->willReturn($tax);
+        $this->couponRepository->method('findOneBy')->willReturn($coupon);
 
-        // Мокаем валидатор
         $this->validator->method('validate')->willReturn(new ConstraintViolationList());
 
-        // Мокаем сервис расчета цены
-        $calculatePriceService = $this->createMock(CalculatePriceService::class);
-        $calculatePriceService->method('calculatePrice')->willReturn(1156); // Ожидаемый результат с налогом
+        $this->createMock(CalculatePriceService::class)->method('calculatePrice')->willReturn(1156);
 
-        $this->em->method('getRepository')->willReturn($this->countriesRepository);
-        $this->em->method('findOneBy')->willReturn($calculatePriceService);
-
-        // Создаем запрос соответствующий вашему API
         $request = new Request([], [], [], [], [], [], json_encode($inputData));
         $request->headers->set('Content-Type', 'application/json');
 
-        // Вызываем метод контроллера
-        $response = $this->controller->index($request, $this->productsRepository, $this->countriesRepository, $this->validator, $this->em);
+        $response = $this->controller->index(
+            $request,
+            $this->productsRepository,
+            $this->countriesRepository,
+            $this->couponRepository,
+            $this->validator,
+            $this->em
+        );
 
-        // Проверяем результат
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame(200, $response->getStatusCode());
         $this->assertJsonStringEqualsJsonString(json_encode($expectedOutput), $response->getContent());
@@ -92,7 +99,7 @@ class PriceControllerTest extends TestCase
                 ],
                 [
                     'name' => 'Тестовый продукт',
-                    'price' => 1156 // Ожидаемая цена с учетом налога
+                    'price' => "8.77"
                 ]
             ],
             // Вы можете добавить больше тестовых случаев здесь
