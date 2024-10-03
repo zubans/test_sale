@@ -19,7 +19,7 @@
         "symfony/runtime": "6.4.*",
         "symfony/validator": "6.4.*",
         "symfony/yaml": "6.4.*",
-        "systemeio/test-for-candidates": "^1.0.2"
+        "systemeio/test-for-candidates": "^1.0"
     },
     "config": {
         "allow-plugins": {
@@ -70,6 +70,7 @@
         }
     },
     "require-dev": {
+        "phpunit/phpunit": "^11.3",
         "symfony/maker-bundle": "^1.60",
         "symfony/var-dumper": "6.4.*"
     }
