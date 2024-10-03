@@ -9,4 +9,8 @@ class PriceHelper
         return number_format($price / 100, 2, '.', '');
     }
 
+    public static function majorToMinor(float $price): string
+    {
+        return $price * 100;
+    }
 }

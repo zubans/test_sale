@@ -51,6 +51,7 @@ class CalculatePriceService
     }
 
     /**
+     * @param $price
      * @param string|null $discount
      * @return int
      * @throws DiscountException

@@ -28,14 +28,14 @@ class PriceController extends AbstractController
      */
     #[Route('/calculate-price', name: 'app_price', methods: ['POST'])]
     public function index(
-        Request $request,
-        ProductsRepository $productsRepository,
-        CountriesRepository $cR,
-        CouponsRepository $couponsRepository,
-        ValidatorInterface $validator,
+        Request                $request,
+        ProductsRepository     $productsRepository,
+        CountriesRepository    $countriesRepository,
+        CouponsRepository      $couponsRepository,
+        ValidatorInterface     $validator,
         EntityManagerInterface $em,
     ): JsonResponse {
-        $countries = $cR->getCountryCodes();
+        $countries = $countriesRepository->getCountryCodes();
 
         $calculatePriceRequest = new CalculatePriceRequest($request->toArray(), $countries);
         $errors = $validator->validate($calculatePriceRequest);
@@ -49,7 +49,7 @@ class PriceController extends AbstractController
         /** @var Products $product */
         $product = $productsRepository->find($calculatePriceRequest->getProductId());
 
-        $tax = $cR->findOneBy(['code' => $calculatePriceRequest->getTaxNumber()]);
+        $tax = $countriesRepository->findOneBy(['code' => $calculatePriceRequest->getTaxNumber()]);
 
         try {
             $price = CalculatePriceService::init($couponsRepository)->calculatePrice(

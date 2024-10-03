@@ -99,7 +99,6 @@ class PriceControllerTest extends TestCase
                     'price' => "10.67"
                 ]
             ],
-            // Вы можете добавить больше тестовых случаев здесь
         ];
     }
 }
